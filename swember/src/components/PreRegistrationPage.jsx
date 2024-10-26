@@ -1,87 +1,81 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, AlertCircle } from 'lucide-react';
 
 const PreRegistrationPage = () => {
   const [formData, setFormData] = useState({
     name: '',
-    mobile: '',
     gender: '',
-    age: '',
-    city: '',
+    lookingFor: '',
+    campus_id: '',
+    customCampus: '',
+    email: '',
+    mobile: '',
+    agreePromotion: true,
   });
 
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false); 
+  const [feedbackData, setFeedbackData] = useState(''); 
+  const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, checked, type } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  const handleCampusChange = (e) => {
+    const value = e.target.value;
+    setFormData({ ...formData, campus_id: value, customCampus: value === '5' ? '' : null });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
-    setIsSubmitting(true);
-
     try {
       const response = await fetch('https://swember.in/register.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(formData).toString(),
       });
-
-      const text = await response.text();
-
-      try {
-        const data = JSON.parse(text);
-        if (data.status === 'success') {
-          setShowFeedback(true);
-        } else {
-          setErrorMessage(data.message || 'Registration failed. Please try again.');
-        }
-      } catch (error) {
-        setErrorMessage(error);
+      const data = await response.json();
+      if (data.status === 'success') {
+        setRegistrationSuccess(true); 
+        setShowFeedbackPopup(true);
+      } else {
+        console.error("Error:", data.message);
       }
     } catch (error) {
-      setErrorMessage(error);
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error:", error);
     }
   };
 
-  const handleFeedbackSubmit = async () => {
-    if (!feedback) {
-      setErrorMessage('Please provide feedback before submitting.');
-      return;
-    }
+  const handleFeedbackChange = (e) => {
+    setFeedbackData(e.target.value);
+  };
 
-    setIsSubmitting(true);
-
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const response = await fetch('https://swember.in/feedback.php', {
+      const feedbackResponse = await fetch('https://swember.in/feedback.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ feedback, mobile: formData.mobile }).toString(),
+        body: new URLSearchParams({
+          name: formData.name,
+          email: formData.email,
+          mobile: formData.mobile || '',
+          feedback: feedbackData,
+        }).toString(),
       });
-
-      const text = await response.text();
-
-      try {
-        const data = JSON.parse(text);
-        if (data.status === 'success') {
-          window.location.href = '/thank-you';
-        } else {
-          setErrorMessage('Feedback submission failed. Please try again.');
-        }
-      } catch (error) {
-        setErrorMessage(error);
+      const feedbackDataResponse = await feedbackResponse.json();
+      if (feedbackDataResponse.status === 'success') {
+        alert("Thank you for your feedback!");
+        setShowFeedbackPopup(false); 
+      } else {
+        console.error("Error:", feedbackDataResponse.message);
       }
     } catch (error) {
-      setErrorMessage(error);
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error:", error);
     }
   };
 
@@ -93,59 +87,15 @@ const PreRegistrationPage = () => {
         className="max-w-md mx-auto"
       >
         <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-lg">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">Pre-Register</h2>
-          
-          {errorMessage && (
-            <div className="mb-6 p-4 bg-red-50 rounded-lg flex items-start">
-              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
-              <p className="ml-3 text-sm text-red-600">{errorMessage}</p>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                value={formData.name}
-                onChange={handleChange}
-              />
+              <label className="block text-gray-600">Name</label>
+              <input name="name" onChange={handleChange} className="w-full p-2 border rounded-md" />
             </div>
 
             <div>
-              <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-1">
-                Mobile Number
-              </label>
-              <input
-                type="tel"
-                id="mobile"
-                name="mobile"
-                required
-                pattern="[0-9]{10}"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                value={formData.mobile}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
-                Gender
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                value={formData.gender}
-                onChange={handleChange}
-              >
+              <label className="block text-gray-600">Gender</label>
+              <select name="gender" onChange={handleChange} className="w-full p-2 border rounded-md">
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -154,98 +104,74 @@ const PreRegistrationPage = () => {
             </div>
 
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
-                Age
-              </label>
-              <input
-                type="number"
-                id="age"
-                name="age"
-                required
-                min="18"
-                max="100"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                value={formData.age}
-                onChange={handleChange}
-              />
+              <label className="block text-gray-600">Looking For</label>
+              <select name="lookingFor" onChange={handleChange} className="w-full p-2 border rounded-md">
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
             </div>
 
             <div>
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                value={formData.city}
-                onChange={handleChange}
-              />
+              <label className="block text-gray-600">Campus</label>
+              <select name="campus_id" onChange={handleCampusChange} className="w-full p-2 border rounded-md">
+                <option value="">Select Campus</option>
+                <option value="1">RCM</option>
+                <option value="2">KIIT</option>
+                <option value="3">SOA</option>
+                <option value="4">Trident</option>
+                <option value="5">Other</option>
+              </select>
+              {formData.campus_id === '5' && (
+                <input name="customCampus" placeholder="Specify your campus" onChange={handleChange} className="w-full p-2 border rounded-md mt-2" />
+              )}
             </div>
 
-            <motion.button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full px-6 py-3 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg font-medium disabled:opacity-50"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </motion.button>
+            <div>
+              <label className="block text-gray-600">Email</label>
+              <input name="email" onChange={handleChange} required className="w-full p-2 border rounded-md" />
+            </div>
+
+            <div>
+              <label className="block text-gray-600">Mobile (Optional)</label>
+              <input name="mobile" onChange={handleChange} className="w-full p-2 border rounded-md" />
+            </div>
+
+            <div>
+              <input type="checkbox" name="agreePromotion" onChange={handleChange} checked={formData.agreePromotion} />
+              <label className="ml-2 text-gray-600">Agree to Promotions</label>
+            </div>
+
+            <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md">Register</button>
           </form>
+
+          {registrationSuccess && (
+            <p className="text-green-500 mt-4">Thank you for registering! Please leave feedback.</p>
+          )}
         </div>
       </motion.div>
 
-      {showFeedback && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 w-full max-w-md"
-          >
-            <div className="flex items-center mb-4">
-              <Check className="h-6 w-6 text-green-500" />
-              <h3 className="text-xl font-bold text-gray-900 ml-2">Registration Successful!</h3>
-            </div>
-            
-            <p className="text-gray-600 mb-4">We would love your feedback!</p>
-            
-            <textarea
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent mb-4"
-              rows={4}
-              placeholder="Your feedback helps us improve"
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-            />
-            
-            <div className="flex justify-end space-x-4">
-              <motion.button
-                className="px-4 py-2 text-gray-600 hover:text-gray-900"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => window.location.href = '/thank-you'}
-              >
-                Skip
-              </motion.button>
-              
-              <motion.button
-                className="px-6 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg font-medium disabled:opacity-50"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleFeedbackSubmit}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-              </motion.button>
-            </div>
-          </motion.div>
-        </motion.div>
+      {showFeedbackPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white/80 backdrop-blur-md p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">We value your feedback!</h2>
+            <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+              <textarea
+                name="feedback"
+                placeholder="Your feedback"
+                value={feedbackData}
+                onChange={handleFeedbackChange}
+                className="w-full p-2 border rounded-md"
+                required
+              />
+              <div className="flex justify-end space-x-2">
+                <button type="button" onClick={() => setShowFeedbackPopup(false)} className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
