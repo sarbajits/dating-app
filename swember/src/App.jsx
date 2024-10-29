@@ -7,10 +7,8 @@ import Footer from './components/Footer';
 import AdminPage from './components/AdminPage'; // Import AdminPage
 import PrivateRoute from './components/PrivateRoute'; // Import PrivateRoute
 import LoginPage from './components/LoginPage';
-import useVisitorTracking from './utils/useVisitorTracking';
 
 const App = () => {
-  useVisitorTracking();
   
   return (
     <Router>

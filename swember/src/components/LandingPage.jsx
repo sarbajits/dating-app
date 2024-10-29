@@ -13,7 +13,7 @@ const LandingPage = () => {
       const response = await fetch('https://swember.in/get_visitors_count.php');
       const data = await response.json();
       if (data.status === 'success') {
-        setVisitorCount(data.data);
+        setVisitorCount(data.total_visitors);
       }
     } catch (error) {
       console.error('Error fetching visitor count:', error);
@@ -22,10 +22,10 @@ const LandingPage = () => {
 
   const fetchRegistrationCount = async () => {
     try {
-      const response = await fetch('https://swember.in/get_users.php');
+      const response = await fetch('https://swember.in/get_users_count.php');
       const data = await response.json();
       if (data.status === 'success') {
-        setRegistrationCount(data.data.length);
+        setRegistrationCount(data.total_users);
       }
     } catch (error) {
       console.error('Error fetching registration count:', error);
@@ -38,7 +38,7 @@ const LandingPage = () => {
     const interval = setInterval(() => {
       fetchVisitorCount();
       fetchRegistrationCount();
-    }, 60000);
+    }, 600);
     return () => clearInterval(interval);
   }, []);
 
