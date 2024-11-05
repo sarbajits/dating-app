@@ -135,12 +135,12 @@ const PreRegistrationPage = () => {
 				<form onSubmit={handleSubmit} className='space-y-4'>
 					<div>
 						<label className='block text-gray-600'>Name</label>
-						<input name='name' onChange={handleChange} className='w-full p-2 border rounded-md' />
+						<input name='name' onChange={handleChange} className='w-full p-2 border rounded-md' required />
 					</div>
 
 					<div>
 						<label className='block text-gray-600'>Gender</label>
-						<select name='gender' onChange={handleChange} className='w-full p-2 border rounded-md'>
+						<select name='gender' onChange={handleChange} className='w-full p-2 border rounded-md' required>
 							<option value=''>Select Gender</option>
 							<option value='male'>Male</option>
 							<option value='female'>Female</option>
@@ -150,7 +150,7 @@ const PreRegistrationPage = () => {
 
 					<div>
 						<label className='block text-gray-600'>Looking For</label>
-						<select name='lookingFor' onChange={handleChange} className='w-full p-2 border rounded-md'>
+						<select name='lookingFor' onChange={handleChange} className='w-full p-2 border rounded-md' required>
 							<option value=''>Select</option>
 							<option value='male'>Male</option>
 							<option value='female'>Female</option>
@@ -197,7 +197,7 @@ const PreRegistrationPage = () => {
 							onChange={handleChange}
 							checked={formData.agreePromotion}
 						/>
-						<label className='ml-2 text-gray-600'>Agree to Promotions</label>
+						<label className='ml-2 text-gray-600'>Agree to receive update in WhatsApp</label>
 					</div>
 
 					<button type='submit' className='w-full bg-blue-500 text-white py-2 rounded-md'>
