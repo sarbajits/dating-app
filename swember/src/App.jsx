@@ -7,6 +7,8 @@ import Footer from './components/Footer';
 import AdminPage from './components/AdminPage'; // Import AdminPage
 import PrivateRoute from './components/PrivateRoute'; // Import PrivateRoute
 import LoginPage from './components/LoginPage';
+import ContactPage from './components/ContactPage';
+import AboutPage from './components/AboutPage';
 
 const App = () => {
   
@@ -18,6 +20,8 @@ const App = () => {
         <Route path="/pre-register" element={<PreRegistrationPage />} />
         <Route path="/thank-you" element={<ThankYouPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route 
           path="/admin" 
           element={
